@@ -366,7 +366,14 @@ function makeDataRows(ctx: DayBuildContext): TableRow[] {
             width: COL_WIDTHS[1]!,
             verticalMerge: VerticalMergeType.CONTINUE,
           }),
-          makeCell({ text: ctx.morningTime, width: COL_WIDTHS[2]! }),
+          makeCell({
+  text: g === ctx.morningGroups[0] ? ctx.morningTime : "",
+  width: COL_WIDTHS[2]!,
+  verticalMerge:
+    g === ctx.morningGroups[0]
+      ? VerticalMergeType.RESTART
+      : VerticalMergeType.CONTINUE,
+}),
           makeCell({ text: g.group, width: COL_WIDTHS[3]! }),
           makeCell({
             bullets: g.contentItems,
@@ -412,7 +419,13 @@ function makeDataRows(ctx: DayBuildContext): TableRow[] {
             width: COL_WIDTHS[1]!,
             verticalMerge: merge,
           }),
-          makeCell({ text: "13:00~16:30", width: COL_WIDTHS[2]! }),
+          makeCell({
+  text: !afternoonRestartUsed ? "13:00~16:30" : "",
+  width: COL_WIDTHS[2]!,
+  verticalMerge: !afternoonRestartUsed
+    ? VerticalMergeType.RESTART
+    : VerticalMergeType.CONTINUE,
+}),
           makeCell({ text: g.group, width: COL_WIDTHS[3]! }),
           makeCell({
             bullets: g.contentItems,
