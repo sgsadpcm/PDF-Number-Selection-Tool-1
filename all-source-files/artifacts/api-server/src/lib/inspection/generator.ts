@@ -356,8 +356,15 @@ function makeDataRows(ctx: DayBuildContext): TableRow[] {
     }),
   );
 
-  // Morning groups -> "上午" CONTINUE
-  for (const g of ctx.morningGroups) {
+  // Morning groups -> "上午" CONTINUE, time col merges when >1 group
+  for (let mi = 0; mi < ctx.morningGroups.length; mi++) {
+    const g = ctx.morningGroups[mi]!;
+    const timeMerge =
+      ctx.morningGroups.length > 1
+        ? mi === 0
+          ? VerticalMergeType.RESTART
+          : VerticalMergeType.CONTINUE
+        : undefined;
     rows.push(
       new TableRow({
         children: [
@@ -367,13 +374,10 @@ function makeDataRows(ctx: DayBuildContext): TableRow[] {
             verticalMerge: VerticalMergeType.CONTINUE,
           }),
           makeCell({
-  text: g === ctx.morningGroups[0] ? ctx.morningTime : "",
-  width: COL_WIDTHS[2]!,
-  verticalMerge:
-    g === ctx.morningGroups[0]
-      ? VerticalMergeType.RESTART
-      : VerticalMergeType.CONTINUE,
-}),
+            text: mi === 0 || timeMerge === undefined ? ctx.morningTime : "",
+            width: COL_WIDTHS[2]!,
+            verticalMerge: timeMerge,
+          }),
           makeCell({ text: g.group, width: COL_WIDTHS[3]! }),
           makeCell({
             bullets: g.contentItems,
@@ -402,30 +406,35 @@ function makeDataRows(ctx: DayBuildContext): TableRow[] {
     }),
   );
 
-  // Afternoon groups -> "下午" RESTART on first, CONTINUE on rest
+  // Afternoon groups -> "下午" RESTART on first, CONTINUE on rest; time col merges when >1 group
   let afternoonRestartUsed = false;
-  for (const g of ctx.afternoonGroups) {
-    const merge: VerticalMergeValue = afternoonRestartUsed
+  for (let ai = 0; ai < ctx.afternoonGroups.length; ai++) {
+    const g = ctx.afternoonGroups[ai]!;
+    const sessionMerge: VerticalMergeValue = afternoonRestartUsed
       ? VerticalMergeType.CONTINUE
       : VerticalMergeType.RESTART;
-    const text = afternoonRestartUsed ? "" : "下午";
+    const sessionText = afternoonRestartUsed ? "" : "下午";
     afternoonRestartUsed = true;
+    const timeMerge =
+      ctx.afternoonGroups.length > 1
+        ? ai === 0
+          ? VerticalMergeType.RESTART
+          : VerticalMergeType.CONTINUE
+        : undefined;
     rows.push(
       new TableRow({
         children: [
           dateCell(dateState, ctx.date),
           makeCell({
-            text,
+            text: sessionText,
             width: COL_WIDTHS[1]!,
-            verticalMerge: merge,
+            verticalMerge: sessionMerge,
           }),
           makeCell({
-  text: !afternoonRestartUsed ? "13:00~16:30" : "",
-  width: COL_WIDTHS[2]!,
-  verticalMerge: !afternoonRestartUsed
-    ? VerticalMergeType.RESTART
-    : VerticalMergeType.CONTINUE,
-}),
+            text: ai === 0 || timeMerge === undefined ? "13:00~16:30" : "",
+            width: COL_WIDTHS[2]!,
+            verticalMerge: timeMerge,
+          }),
           makeCell({ text: g.group, width: COL_WIDTHS[3]! }),
           makeCell({
             bullets: g.contentItems,
